@@ -66,7 +66,7 @@
 ## 04-benchmarks（评测基准）
 
 - arXiv API：`abs:"benchmark"+AND+abs:"agent"`、`abs:"SWE-bench"`、`abs:"tool use benchmark"`
-- 站点：`https://www.swebench.com/`、`https://www.gaia-benchmark.com/`、`https://tau-bench.com/`
+- 站点：`https://www.swebench.com/`、`https://www.gaia-benchmark.com/`（2026-10-09 服务器实测 DNS 解析失败，暂不可用，改走 arXiv API + GitHub API）、`https://tau-bench.com/`
 - GitHub API：基准仓库的 releases 与 leaderboard 更新
 - 关键词：`agent benchmark contamination` / `reasoning benchmark` / `long context evaluation`
 
