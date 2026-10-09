@@ -28,7 +28,7 @@ echo "=== AI 系来源（SKILL 3.0.1 第 2 表，首测/复测） ==="
 ok=0
 fail=0
 for spec in \
-  "00-arxiv-api|http://export.arxiv.org/api/query?search_query=cat:cs.LG\&max_results=1\&sortBy=submittedDate\&sortOrder=descending|15" \
+  "00-arxiv-api|http://export.arxiv.org/api/query?search_query=cat:cs.LG&max_results=1&sortBy=submittedDate&sortOrder=descending|15" \
   "00-arxiv-list|https://arxiv.org/list/cs.LG/recent|15" \
   "00-arxiv-pdf|https://arxiv.org/pdf/2510.00001|60" \
   "00-openreview|https://api2.openreview.net/notes?limit=1|12" \
@@ -36,7 +36,7 @@ for spec in \
   "01-arxiv-csCL|https://arxiv.org/list/cs.CL/recent|15" \
   "02-langchain-blog|https://blog.langchain.dev/rss/|15" \
   "02-interconnects|https://www.interconnects.ai/feed|15" \
-  "02-s2-api|https://api.semanticscholar.org/graph/v1/paper/search?query=LLM+agent\&limit=1|12" \
+  "02-s2-api|https://api.semanticscholar.org/graph/v1/paper/search?query=LLM+agent&limit=1|12" \
   "03-mcp-docs|https://modelcontextprotocol.io/|15" \
   "03-github-mcp|https://api.github.com/repos/modelcontextprotocol/specification/releases|15" \
   "03-github-a2a|https://api.github.com/repos/a2aproject/A2A/releases|15" \

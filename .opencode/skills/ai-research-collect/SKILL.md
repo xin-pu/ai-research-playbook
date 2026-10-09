@@ -61,37 +61,33 @@ git status --porcelain           # 非空说明有他方未提交改动，记录
 
 #### 3.0.1 服务器出口可达性
 
-本表两部分构成，**首轮运行前必须先跑 `automation/check-egress.sh` 并把结果回写本节**：
+本表已在 **2026-10-09 由 `automation/check-egress.sh` 在服务器上实测回写**（同一台阿里云服务器，optical 工作流的继承结论同日复测仍成立）。遇到新的长期失败先跑该脚本再改本表。
 
-1. **同服务器继承（optical-module-playbook 工作流 2026-10-09 实测，同一台阿里云服务器）**：
+**可用**（实测 HTTP 码与耗时）：
 
-| 可用 | 备注 |
+| 来源 | 实测 |
 | --- | --- |
-| `https://api.github.com/...`（repos、orgs、releases、commits、contents + `Accept: application/vnd.github.raw`） | 03/05 域首选；`raw.githubusercontent.com` **不通**，取文件内容一律走 contents API |
-| `https://github.com/<org>/<repo>`（网页） | 可通，仅网页路径 |
+| `http://export.arxiv.org/api/query?...`（arXiv API，00/01/02/04 域首选） | 可达；注意并发查询会超时，**逐条顺序 + `id_list` 批量** |
+| `https://arxiv.org/list/<cat>/recent`、`https://arxiv.org/pdf/<id>` | 200；PDF 约 30s（`-m 120`） |
+| `https://api.github.com/...`（repos、orgs、releases、commits、contents + `Accept: application/vnd.github.raw`） | 03/05 域首选，约 1s |
 | `https://registry.npmjs.org/<pkg>`、`https://pypi.org/pypi/<pkg>/json` | 05 域发布节奏 |
-| `https://api.crossref.org/works?query.bibliographic=<词>&rows=5` | 只用于定位已知文献，**不用于「本周新增」计数**（模糊匹配噪音大） |
+| `https://modelcontextprotocol.io/`、`https://www.swebench.com/` | 200 |
+| `https://www.anthropic.com/news` | 200；列表页结构：`<li><a href="/news/<slug>"><time>…</time>…<span …__title…>标题</span>` |
+| `https://blog.langchain.dev/rss/`、`https://www.interconnects.ai/feed`、`https://newsletter.semianalysis.com/` | RSS/自定义域 substack 可直取；`*.substack.com` 通配域仍不通 |
+| `https://www.jiqizhixin.com/` | 200 但首页为 JS 渲染，未取到结构化条目，暂不作条目源 |
 | `https://www.bing.com/search?q=<编码>` | 关键词检索唯一通道，必须带 `-L`；`after:` 日期限定基本失效，不能当判据 |
-| `https://newsletter.semianalysis.com/`、其它 substack **自定义域名** | 可直取；`*.substack.com` 通配域名**不通** |
-| `https://www.jiqizhixin.com/`、`https://www.c114.com.cn/` | 中文站点毫秒级 |
+| `https://api.crossref.org/works?...` | 只用于定位已知文献，**不用于「本周新增」计数** |
 
-| 需浏览器 UA | `ieeexplore.ieee.org`（无 UA 418） |
+**不可达，禁止浪费超时**（失败一次即跳过，不重试）：
+
+| 来源 | 实测 |
 | --- | --- |
-
-| **不可达，禁止浪费超时** | `raw.githubusercontent.com`、`cdn.jsdelivr.net`、`google.com`、`lite/html.duckduckgo.com`、`web.archive.org`、`r.jina.ai`、`*.substack.com`（自定义域除外）、`openai.com`（403，只登记索引页标题或跳过） |
-| --- | --- |
-
-2. **AI 系来源首测状态**（标「待首测」的一律先探测再用，失败即记「出口不可达」并在分析文档列出）：
-
-| 来源 | 状态 |
-| --- | --- |
-| `http://export.arxiv.org/api/query`、`https://arxiv.org/list/*/recent`、`https://arxiv.org/pdf/<id>` | 待首测（本机开发环境实测可用，服务器需复测） |
-| `https://www.anthropic.com/news`、`https://blog.langchain.dev/rss/`、`https://www.interconnects.ai/feed` | 待首测（本机实测可用） |
-| `https://modelcontextprotocol.io/`、`https://www.swebench.com/` | 待首测 |
-| `https://api2.openreview.net/...` | 待首测；本机实测 403 挑战页，**失败一次即跳过，不重试** |
-| `https://api.semanticscholar.org/...` | 待首测；本机实测 429 限流，**不重试** |
-| `https://huggingface.co/papers` | 待首测；本机实测整站连接失败，大概率不可达 |
-| `https://openai.com/news/` | 本机实测 403；服务器按不可达处理，跳过并登记 |
+| `https://api2.openreview.net/...` | 403 挑战页 |
+| `https://api.semanticscholar.org/...` | 400/429（无 API key 不可用），不重试 |
+| `https://huggingface.co/papers` | 连接超时（12s 无响应） |
+| `https://openai.com/news/` | 403，跳过并登记 |
+| `raw.githubusercontent.com`、`cdn.jsdelivr.net`、`google.com`、`lite/html.duckduckgo.com`、`web.archive.org`、`r.jina.ai` | 短超时确认仍全部不通 |
+| `ieeexplore.ieee.org` | 无浏览器 UA 返回 418，带 UA 可通但不做条目源 |
 
 抓取通则：`curl -sS -L -m 20 -A "$UA"`（UA 用常见 Chrome 串）；下原件时提高到 `-m 120`；单次采集总时长 ≤ 15 分钟，超时即跳过该条并记录。**不要因个别来源不可达而中止整轮。**
 
