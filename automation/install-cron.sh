@@ -7,12 +7,14 @@ REPO="${AI_PLAYBOOK_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 LOGS="$REPO/automation/logs"
 mkdir -p "$LOGS"
 
-DAILY="${AI_PLAYBOOK_DAILY_CRON:-0 9 * * *}"
-WEEKLY="${AI_PLAYBOOK_WEEKLY_CRON:-30 0 * * 0}"
+DAILY="0 9 * * *"
+WEEKLY="30 0 * * 0"
+SCRIPT="$REPO/automation/ai-playbook-daily.sh"
 
+# 注意：去重键必须包含运行模式（daily/weekly 用同一个脚本，只按脚本路径判重会漏装第二条）
 entries=(
-  "$DAILY $REPO/automation/ai-playbook-daily.sh daily >> $LOGS/cron.log 2>&1"
-  "$WEEKLY $REPO/automation/ai-playbook-daily.sh weekly >> $LOGS/cron.log 2>&1"
+  "$DAILY $SCRIPT daily >> $LOGS/cron.log 2>&1"
+  "$WEEKLY $SCRIPT weekly >> $LOGS/cron.log 2>&1"
 )
 
 current=/tmp/ai-playbook-crontab.current
@@ -20,8 +22,9 @@ crontab -l > "$current" 2>/dev/null || : > "$current"
 added=0
 
 for e in "${entries[@]}"; do
-  script=$(printf '%s\n' "$e" | awk '{print $6}')
-  if grep -qF "$script" "$current"; then
+  # 第 6 字段是脚本路径，第 7 字段是运行模式；按「路径+模式」整串判重
+  key=$(printf '%s\n' "$e" | awk '{print $6 " " $7}')
+  if grep -qF "$key" "$current"; then
     echo "已存在 : $e"
   else
     printf '%s\n' "$e" >> "$current"
