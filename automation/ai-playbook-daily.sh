@@ -20,7 +20,7 @@ esac
 REPO="${AI_PLAYBOOK_DIR:-$HOME/ai-research-playbook}"
 CFG="$REPO/automation/config.json"
 LOGS="$REPO/automation/logs"
-STAMP="$(date +%Y-%m-%d_%H%M%S)"
+STAMP="${AI_PLAYBOOK_STAMP:-$(date +%Y-%m-%d_%H%M%S)}"
 
 [ -d "$REPO" ] || { echo "缺少仓库 $REPO"; exit 1; }
 mkdir -p "$LOGS"
@@ -33,7 +33,7 @@ cd "$REPO" || exit 1
 # 文件改掉；pull 后立刻 exec 重新打开新文件即可规避（AI_PLAYBOOK_NO_PULL=1 可跳过）。
 if [ "${AI_PLAYBOOK_NO_PULL:-0}" != "1" ]; then
   git pull --ff-only >>"$LOG" 2>&1 || echo "git pull failed (continuing, 技能内会重试)" | tee -a "$LOG"
-  AI_PLAYBOOK_NO_PULL=1 exec bash "$0" "$@"
+  AI_PLAYBOOK_NO_PULL=1 AI_PLAYBOOK_STAMP="$STAMP" exec bash "$0" "$@"
 fi
 
 # 独立锁：只防止本任务自身重叠，不影响同一台服务器上的其它 playbook 任务
