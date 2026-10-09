@@ -1,0 +1,9 @@
+{
+  "repoDir": "/home/admin/ai-research-playbook",
+  "reportTo": "pu.xin@outlook.com",
+  "cadence": {
+    "daily": "0 9 * * *",
+    "weekly": "30 0 * * 0"
+  },
+  "note": "reportTo 为汇报与告警收件人；cadence 只作参考，实际条目见 install-cron.sh。"
+}

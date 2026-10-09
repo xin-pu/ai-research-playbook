@@ -1,0 +1,23 @@
+# Obsidian 界面状态（只提交配置，不提交界面状态）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+.obsidian/appearance.json
+
+# 采集运行日志与锁（automation 运行产物）
+automation/logs/
+automation/*.lock
+automation/.cron-*
+
+# 转换衍生物：pdftotext 输出可由原件重新生成，不纳入版本控制（见 Sources/归箱规则.md §8）
+Sources/**/*.txt
+
+# 编辑器与系统
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Python 实验
+__pycache__/
+*.pyc
+.venv/

@@ -1,0 +1,10 @@
+# 统一换行：shell 脚本在 Linux 服务器 cron 下必须 LF
+* text=auto
+*.sh text eol=lf
+*.md text
+*.json text
+
+# 原件按二进制处理，不做换行转换
+*.pdf binary
+*.png binary
+*.jpg binary
